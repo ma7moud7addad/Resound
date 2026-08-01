@@ -18,7 +18,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -33,6 +36,7 @@ private const val CHANGELOG_URL =
 @Composable
 fun AboutDialog(onDismiss: () -> Unit) {
     val ctx = LocalContext.current
+    var showUpdater by remember { mutableStateOf(false) }
     val version = remember {
         runCatching {
             ctx.packageManager.getPackageInfo(ctx.packageName, 0).versionName
@@ -43,9 +47,17 @@ fun AboutDialog(onDismiss: () -> Unit) {
         runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
     }
 
+    if (showUpdater) {
+        UpdateDialog(onDismiss = { showUpdater = false })
+        return
+    }
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Close") } },
+        confirmButton = {
+            TextButton(onClick = { showUpdater = true }) { Text("Check for updates") }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Close") } },
         title = { Text("Resound") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {

@@ -33,9 +33,9 @@ arm64-v8a only. Sideload-friendly; no Play Store, no account.
   (`atrim` + `adelay` + `amix`).
 - **About** — version, links, and attribution from the editor header.
 
-## Status — v0.6.2
+## Status — v0.7.0 source
 
-Feature-complete for the core workflow: single-file editing, recording,
+Feature-complete for the core workflow, now with a secure user-initiated updater: single-file editing, recording,
 playback, ringtones, and multitrack mixing, with the Resound visual identity
 (dark theme, signal-teal accent, adaptive launcher icon) and an About dialog.
 
@@ -52,6 +52,7 @@ playback, ringtones, and multitrack mixing, with the Resound visual identity
 | 0.5.0   | Multitrack timeline ✓ |
 | 0.6.0   | Visual identity, launcher icon, clip trim + zoom/scroll ✓ |
 | 0.6.2   | About dialog ✓ |
+| 0.7.0   | Secure in-app updater ✓ |
 | later   | RMS waveform rendering; quality vocal removal (on-device Demucs/Spleeter) |
 
 ## FFmpeg dependency
@@ -85,3 +86,13 @@ compileSdk/targetSdk 35, minSdk 26, Java 17. arm64-v8a only (FFmpeg native libs)
 ## Changelog
 
 See [CHANGELOG.md](https://github.com/MikereDD/It-Works-On-My-Machine/blob/main/Android/Resound/CHANGELOG.md).
+
+
+## Updater release workflow
+
+1. Build and sign the release APK with the same signing key as the installed app.
+2. Copy it into `releases/` and compute its SHA-256.
+3. Update `releases/update.json` with the new `versionCode`, `versionName`, raw HTTPS APK URL, hash, and notes.
+4. Commit the APK and manifest together. The app rejects mismatched hashes, package names, or signing certificates.
+
+`releases/update.example.json` is a template for the next release.

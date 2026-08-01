@@ -12,8 +12,14 @@ android {
         applicationId = "com.typezero.resound"
         minSdk = 26
         targetSdk = 35
-        versionCode = 12
-        versionName = "0.6.2"
+        versionCode = 13
+        versionName = "0.7.0"
+
+        buildConfigField(
+            "String",
+            "UPDATE_MANIFEST_URL",
+            "\"https://raw.githubusercontent.com/MikereDD/It-Works-On-My-Machine/main/Android/Resound/releases/update.json\"",
+        )
 
         // FFmpeg ships large native libs — restrict ABIs to keep the APK sane.
         ndk {
@@ -40,6 +46,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     // Kotlin sources live under src/main/kotlin per repo convention.

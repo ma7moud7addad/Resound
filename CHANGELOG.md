@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.7.0] - 2026-07-27
+
+### Added
+- Secure, user-initiated in-app updater accessible from About.
+- HTTPS-only update manifest, SHA-256 verification, package-name validation,
+  and signing-certificate matching against the installed app before install.
+- Download progress, Android unknown-sources permission flow, FileProvider-based
+  APK handoff, and release manifest examples under `releases/`.
+
+### Changed
+- Version advanced to 0.7.0 (`versionCode` 13).
+- Added the network and package-install permissions required by the updater.
+
+### Audit notes
+- See `AUDIT.md` for fixed findings and deferred architectural work.
+
 All notable changes to Resound are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
