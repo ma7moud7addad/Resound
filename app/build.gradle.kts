@@ -12,8 +12,8 @@ android {
         applicationId = "com.typezero.resound"
         minSdk = 26
         targetSdk = 35
-        versionCode = 13
-        versionName = "0.7.0"
+        versionCode = 14
+        versionName = "0.8.0-dev.1"
 
         buildConfigField(
             "String",
@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.material.icons.extended)
 
     debugImplementation(libs.androidx.ui.tooling)
 

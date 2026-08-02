@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.8.0-dev.1 — Premium app shell
+
+- Added a persistent premium bottom navigation shell for Editor, Multitrack, Library, and Settings.
+- Added reusable bordered `ResoundCard` surfaces and expanded the darkroom-for-sound design tokens.
+- Added a Library foundation screen for future recent exports and project history.
+- Added a dedicated Settings screen with updater, About, changelog, and future workspace controls.
+- Preserved the existing Editor and Multitrack workflows while moving navigation responsibility to the app shell.
+- Added the approved premium UI mockup under `docs/design/` as the implementation reference.
+
 ## [0.7.0] - 2026-07-27
 
 ### Added

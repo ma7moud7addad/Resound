@@ -10,6 +10,10 @@ handled by FFmpeg, with results saved to your shared `Music/Resound` library.
 
 Built with Kotlin and Jetpack Compose.
 
+## Premium interface roadmap
+
+The v0.8 development line is implementing the approved premium Resound mockup in deliberate layers: shared design tokens and navigation shell first, followed by the Editor waveform workspace, Multitrack mixer, Library, and Settings refinement. The canonical visual reference is stored at `docs/design/Resound-premium-mockup.png`.
+
 ## Download
 
 **[Download the latest APK (v0.6.2)](https://github.com/MikereDD/It-Works-On-My-Machine/raw/refs/heads/main/Android/Resound/releases/Resound-v0.6.2.apk)**
@@ -33,7 +37,7 @@ arm64-v8a only. Sideload-friendly; no Play Store, no account.
   (`atrim` + `adelay` + `amix`).
 - **About** — version, links, and attribution from the editor header.
 
-## Status — v0.7.0 source
+## Status — v0.8.0-dev.1 source
 
 Feature-complete for the core workflow, now with a secure user-initiated updater: single-file editing, recording,
 playback, ringtones, and multitrack mixing, with the Resound visual identity
