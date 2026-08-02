@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.8.0-dev.6
+
+- Rebuilt Settings as a complete premium application-information workspace.
+- Consolidated updater, About, changelog, export destination, processing, and privacy details.
+- Added a visible development-channel/version badge and consistent action-row treatment.
+- Removed the unfinished workspace placeholder and aligned public attribution with Typezer∅.
+- Advanced the development build to versionCode 19.
+
 ## 0.8.0-dev.5
 
 - Replaced the Library placeholder with a live Music/Resound export browser.

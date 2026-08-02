@@ -1,11 +1,17 @@
+/*
+ * file:    SettingsScreen.kt
+ * author:  Mike Redd (Typezer∅)
+ * version: 0.8.0-dev.6
+ * desc:    Premium settings and application-information workspace.
+ */
 package com.typezero.resound.feature.settings
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,12 +19,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.GraphicEq
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.OpenInNew
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SystemUpdate
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -28,11 +45,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.typezero.resound.feature.about.AboutDialog
 import com.typezero.resound.feature.about.UpdateDialog
 import com.typezero.resound.ui.components.ResoundCard
+import com.typezero.resound.ui.theme.Line
+import com.typezero.resound.ui.theme.PanelHi
 import com.typezero.resound.ui.theme.Signal
 import com.typezero.resound.ui.theme.TextLo
 
@@ -60,57 +81,66 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 16.dp)
-            .padding(bottom = 24.dp),
+            .padding(bottom = 28.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        Text("Settings", style = MaterialTheme.typography.headlineSmall)
-        Text(
-            "Resound preferences, updates, and application information",
-            style = MaterialTheme.typography.bodySmall,
-            color = TextLo,
-        )
+        SettingsHeader(version = version)
 
-        Spacer(Modifier.height(4.dp))
-
+        SettingsSectionTitle("APPLICATION")
         ResoundCard(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(18.dp)) {
-                Text("Application", style = MaterialTheme.typography.titleMedium)
-                Spacer(Modifier.height(14.dp))
-
-                SettingsRow(
-                    icon = { Icon(Icons.Outlined.SystemUpdate, contentDescription = null) },
+            Column(modifier = Modifier.padding(horizontal = 18.dp, vertical = 4.dp)) {
+                SettingsActionRow(
+                    icon = Icons.Outlined.SystemUpdate,
                     title = "Check for updates",
-                    subtitle = "Installed version $version",
+                    subtitle = "Secure manifest and APK verification",
                     onClick = { showUpdater = true },
                 )
-
-                SettingsRow(
-                    icon = { Icon(Icons.Outlined.Info, contentDescription = null) },
+                SettingsDivider()
+                SettingsActionRow(
+                    icon = Icons.Outlined.Info,
                     title = "About Resound",
                     subtitle = "Credits, project details, and licensing",
                     onClick = { showAbout = true },
                 )
-
-                SettingsRow(
-                    icon = { Icon(Icons.Outlined.OpenInNew, contentDescription = null) },
+                SettingsDivider()
+                SettingsActionRow(
+                    icon = Icons.Outlined.OpenInNew,
                     title = "View changelog",
-                    subtitle = "See release notes and project history",
+                    subtitle = "Release notes and development history",
                     onClick = { open(CHANGELOG_URL) },
                 )
             }
         }
 
+        SettingsSectionTitle("WORKSPACE")
         ResoundCard(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(18.dp)) {
-                Text("Audio workspace", style = MaterialTheme.typography.titleMedium)
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    "Additional editor, export, and appearance controls will be introduced here as the premium interface evolves.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TextLo,
+            Column(modifier = Modifier.padding(horizontal = 18.dp, vertical = 4.dp)) {
+                SettingsInfoRow(
+                    icon = Icons.Outlined.Folder,
+                    title = "Export destination",
+                    value = "Music/Resound",
+                )
+                SettingsDivider()
+                SettingsInfoRow(
+                    icon = Icons.Outlined.GraphicEq,
+                    title = "Processing engine",
+                    value = "FFmpeg · on device",
+                )
+                SettingsDivider()
+                SettingsInfoRow(
+                    icon = Icons.Outlined.Lock,
+                    title = "Privacy",
+                    value = "Local-first · no account · no ads",
                 )
             }
         }
+
+        Text(
+            "Typezer∅ Studio · Resound",
+            style = MaterialTheme.typography.labelMedium,
+            color = TextLo,
+            modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 6.dp),
+        )
     }
 
     if (showAbout) AboutDialog(onDismiss = { showAbout = false })
@@ -118,8 +148,78 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun SettingsRow(
-    icon: @Composable () -> Unit,
+private fun SettingsHeader(version: String) {
+    ResoundCard(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.padding(18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            Surface(
+                modifier = Modifier.size(48.dp),
+                shape = CircleShape,
+                color = Signal.copy(alpha = 0.12f),
+                border = BorderStroke(1.dp, Signal.copy(alpha = 0.45f)),
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        Icons.Outlined.Settings,
+                        contentDescription = null,
+                        tint = Signal,
+                        modifier = Modifier.size(25.dp),
+                    )
+                }
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text("Settings", style = MaterialTheme.typography.headlineSmall)
+                Text(
+                    "Workspace, updates, and application details",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextLo,
+                )
+            }
+
+            Surface(
+                shape = MaterialTheme.shapes.small,
+                color = PanelHi,
+                border = BorderStroke(1.dp, Line),
+            ) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
+                    horizontalAlignment = Alignment.End,
+                ) {
+                    Text(
+                        "DEVELOPMENT",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Signal,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        version,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SettingsSectionTitle(text: String) {
+    Text(
+        text,
+        style = MaterialTheme.typography.labelMedium,
+        color = Signal,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.padding(start = 4.dp, top = 2.dp),
+    )
+}
+
+@Composable
+private fun SettingsActionRow(
+    icon: ImageVector,
     title: String,
     subtitle: String,
     onClick: () -> Unit,
@@ -128,16 +228,50 @@ private fun SettingsRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(vertical = 12.dp),
+            .padding(vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        CompositionLocalProvider(androidx.compose.material3.LocalContentColor provides Signal) {
-            icon()
-        }
+        SettingsIcon(icon)
         Column(modifier = Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.titleMedium)
             Text(subtitle, style = MaterialTheme.typography.bodySmall, color = TextLo)
         }
+        Icon(
+            Icons.Outlined.ChevronRight,
+            contentDescription = null,
+            tint = TextLo,
+        )
     }
+}
+
+@Composable
+private fun SettingsInfoRow(
+    icon: ImageVector,
+    title: String,
+    value: String,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        SettingsIcon(icon)
+        Column(modifier = Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text(value, style = MaterialTheme.typography.bodySmall, color = TextLo)
+        }
+    }
+}
+
+@Composable
+private fun SettingsIcon(icon: ImageVector) {
+    CompositionLocalProvider(androidx.compose.material3.LocalContentColor provides Signal) {
+        Icon(icon, contentDescription = null, modifier = Modifier.size(23.dp))
+    }
+}
+
+@Composable
+private fun SettingsDivider() {
+    Divider(color = Line.copy(alpha = 0.65f))
 }

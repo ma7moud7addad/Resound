@@ -1,7 +1,7 @@
 /*
  * file:    AboutDialog.kt
  * author:  Mike Redd (typezero)
- * version: 0.6.2
+ * version: 0.8.0-dev.6
  * desc:    About dialog — app version (read from PackageInfo), a one-line
  *          description, links to the repo and changelog, and open-source
  *          attribution for the audio engine.
@@ -84,7 +84,7 @@ fun AboutDialog(onDismiss: () -> Unit) {
                     style = MaterialTheme.typography.bodySmall,
                     color = TextLo,
                 )
-                Text("By typezero", style = MaterialTheme.typography.bodySmall, color = TextLo)
+                Text("By Typezer∅", style = MaterialTheme.typography.bodySmall, color = TextLo)
             }
         },
     )

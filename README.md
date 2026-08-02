@@ -39,7 +39,7 @@ arm64-v8a only. Sideload-friendly; no Play Store, no account.
 - **Library** — browse files exported to `Music/Resound`, view format/size/date, share them, or reopen them directly in the Editor.
 - **About** — version, links, attribution, and secure update checks from Settings.
 
-## Status — v0.8.0-dev.5 source
+## Status — v0.8.0-dev.6 source
 
 Feature-complete for the core workflow, now with a secure user-initiated updater: single-file editing, recording,
 playback, ringtones, and multitrack mixing, with the Resound visual identity
