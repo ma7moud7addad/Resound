@@ -1,7 +1,7 @@
 /*
  * file:    TimelineScreen.kt
  * author:  Mike Redd (typezero)
- * version: 0.8.0-dev.3
+ * version: 0.8.0-dev.4
  * desc:    Premium multitrack workspace with a shared ruler, compact track
  *          controls, zoomable lanes, draggable/trim-capable clips, and a
  *          prominent mixdown action.
@@ -85,6 +85,7 @@ import com.typezero.resound.ui.theme.Signal
 import com.typezero.resound.ui.theme.SignalDeep
 import com.typezero.resound.ui.theme.TextLo
 import com.typezero.resound.ui.theme.TextMid
+import com.typezero.resound.ui.theme.TimecodeStyle
 import kotlinx.coroutines.launch
 import kotlin.math.ceil
 import kotlin.math.max
@@ -207,7 +208,7 @@ fun TimelineScreen(
                         Button(
                             onClick = { tracks = tracks + Track(nextId(), "Track ${tracks.size + 1}") },
                             enabled = !busy,
-                            modifier = Modifier.weight(1f).height(52.dp),
+                            modifier = Modifier.weight(1f).height(60.dp),
                         ) {
                             Icon(Icons.Outlined.Add, contentDescription = null)
                             Spacer(Modifier.width(8.dp))
@@ -216,7 +217,7 @@ fun TimelineScreen(
                         OutlinedButton(
                             onClick = { exportMix() },
                             enabled = !busy && tracks.any { it.clips.isNotEmpty() },
-                            modifier = Modifier.weight(1f).height(52.dp),
+                            modifier = Modifier.weight(1f).height(60.dp),
                             border = BorderStroke(1.dp, Signal),
                         ) {
                             Icon(Icons.Outlined.FileUpload, contentDescription = null)
@@ -465,73 +466,107 @@ private fun TrackLane(
     onTrimIn: (Long, Long) -> Unit,
     onTrimOut: (Long, Long) -> Unit,
 ) {
+    val selected = track.clips.firstOrNull { it.id == selectedClip }
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         color = Panel,
-        border = BorderStroke(1.dp, Line),
+        border = BorderStroke(1.dp, if (selected != null) Signal.copy(alpha = 0.55f) else Line),
     ) {
-        Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(
-                modifier = Modifier.width(TRACK_LABEL_WIDTH - 10.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .width(4.dp)
-                            .height(34.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(accent),
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        track.name,
-                        style = MaterialTheme.typography.titleSmall,
-                        color = if (track.muted) TextLo else MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+        Column(modifier = Modifier.padding(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(
+                    modifier = Modifier.width(TRACK_LABEL_WIDTH - 10.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .width(4.dp)
+                                .height(34.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(accent),
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            track.name,
+                            style = MaterialTheme.typography.titleSmall,
+                            color = if (track.muted) TextLo else MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        TinyControl("+") { if (enabled) onAddClip() }
+                        TinyControl("M", active = track.muted) { if (enabled) onToggleMute() }
+                    }
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    TinyControl("+") { if (enabled) onAddClip() }
-                    TinyControl(if (track.muted) "M" else "M", active = track.muted) { if (enabled) onToggleMute() }
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(LANE_H.dp)
+                        .clip(RoundedCornerShape(11.dp))
+                        .background(Ink)
+                        .horizontalScroll(scrollState),
+                ) {
+                    Canvas(modifier = Modifier.width(contentDp).height(LANE_H.dp)) {
+                        val seconds = (size.width / (pxPerMs * 1000f)).toInt().coerceAtLeast(0)
+                        for (second in 0..seconds) {
+                            val x = second * 1000f * pxPerMs
+                            drawLine(LineSoft, Offset(x, 0f), Offset(x, size.height), 1f)
+                        }
+                        drawLine(Line, Offset(0f, size.height / 2), Offset(size.width, size.height / 2), 1f)
+                    }
+                    Box(modifier = Modifier.width(contentDp).height(LANE_H.dp)) {
+                        track.clips.forEach { clip ->
+                            ClipBox(
+                                clip = clip,
+                                pxPerMs = pxPerMs,
+                                accent = accent,
+                                muted = track.muted,
+                                selected = selectedClip == clip.id,
+                                onSelect = { onSelectClip(clip.id) },
+                                onMove = { onMove(clip.id, it) },
+                                onTrimIn = { onTrimIn(clip.id, it) },
+                                onTrimOut = { onTrimOut(clip.id, it) },
+                            )
+                        }
+                    }
                 }
             }
 
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(LANE_H.dp)
-                    .clip(RoundedCornerShape(11.dp))
-                    .background(Ink)
-                    .horizontalScroll(scrollState),
-            ) {
-                Canvas(modifier = Modifier.width(contentDp).height(LANE_H.dp)) {
-                    val seconds = (size.width / (pxPerMs * 1000f)).toInt().coerceAtLeast(0)
-                    for (second in 0..seconds) {
-                        val x = second * 1000f * pxPerMs
-                        drawLine(LineSoft, Offset(x, 0f), Offset(x, size.height), 1f)
-                    }
-                    drawLine(Line, Offset(0f, size.height / 2), Offset(size.width, size.height / 2), 1f)
-                }
-                Box(modifier = Modifier.width(contentDp).height(LANE_H.dp)) {
-                    track.clips.forEach { clip ->
-                        ClipBox(
-                            clip = clip,
-                            pxPerMs = pxPerMs,
-                            accent = accent,
-                            muted = track.muted,
-                            selected = selectedClip == clip.id,
-                            onSelect = { onSelectClip(clip.id) },
-                            onMove = { onMove(clip.id, it) },
-                            onTrimIn = { onTrimIn(clip.id, it) },
-                            onTrimOut = { onTrimOut(clip.id, it) },
-                        )
-                    }
-                }
+            if (selected != null) {
+                Spacer(Modifier.height(10.dp))
+                SelectedClipReadout(selected)
             }
         }
+    }
+}
+
+@Composable
+private fun SelectedClipReadout(clip: Clip) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(Ink.copy(alpha = 0.72f))
+            .padding(horizontal = 12.dp, vertical = 9.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        ClipMetric("START", formatTime(clip.startMs))
+        ClipMetric("DURATION", formatTime(clip.lengthMs))
+        ClipMetric("END", formatTime(clip.startMs + clip.lengthMs))
+    }
+}
+
+@Composable
+private fun ClipMetric(label: String, value: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(label, style = MaterialTheme.typography.labelSmall, color = TextLo)
+        Text(value, style = TimecodeStyle, color = Signal)
     }
 }
 
@@ -584,7 +619,7 @@ private fun ClipBox(
             .padding(vertical = 5.dp)
             .clip(RoundedCornerShape(9.dp))
             .pointerInput(clip.id) {
-                val edge = 20.dp.toPx()
+                val edge = 30.dp.toPx()
                 detectDragGestures(
                     onDragStart = { position ->
                         selectCallback.value()
@@ -638,8 +673,25 @@ private fun ClipBox(
                 style = Stroke(width = if (selected) 4f else 2f),
             )
             if (selected) {
-                drawRect(Signal, Offset(0f, 0f), Size(5f, size.height))
-                drawRect(Signal, Offset(size.width - 5f, 0f), Size(5f, size.height))
+                val handleWidth = 12.dp.toPx()
+                drawRoundRect(
+                    color = Signal,
+                    topLeft = Offset(0f, 0f),
+                    size = Size(handleWidth, size.height),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(6.dp.toPx()),
+                )
+                drawRoundRect(
+                    color = Signal,
+                    topLeft = Offset(size.width - handleWidth, 0f),
+                    size = Size(handleWidth, size.height),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(6.dp.toPx()),
+                )
+                val grip = Color.White.copy(alpha = 0.72f)
+                val centerY = size.height / 2f
+                for (offset in listOf(-6f, 0f, 6f)) {
+                    drawCircle(grip, radius = 1.6.dp.toPx(), center = Offset(handleWidth / 2f, centerY + offset))
+                    drawCircle(grip, radius = 1.6.dp.toPx(), center = Offset(size.width - handleWidth / 2f, centerY + offset))
+                }
             }
         }
         Text(

@@ -3,6 +3,8 @@ package com.typezero.resound.feature.settings
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,12 +13,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.SystemUpdate
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -58,8 +58,9 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .safeDrawingPadding()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .padding(bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Text("Settings", style = MaterialTheme.typography.headlineSmall)
@@ -109,15 +110,6 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                     color = TextLo,
                 )
             }
-        }
-
-        Button(
-            onClick = { showUpdater = true },
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Icon(Icons.Outlined.SystemUpdate, contentDescription = null)
-            Spacer(Modifier.padding(horizontal = 4.dp))
-            Text("Check for updates")
         }
     }
 

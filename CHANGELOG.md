@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.0-dev.4
+
+- Added visible trim handles and stronger selected-clip feedback in Multitrack.
+- Added live start, duration, and end readouts for the selected clip.
+- Enlarged primary Multitrack controls to prevent text clipping.
+- Made Settings scroll safely and removed the redundant clipped updater button.
+
 ## 0.8.0-dev.3
 
 - Rebuilt Multitrack as a premium studio workspace.
