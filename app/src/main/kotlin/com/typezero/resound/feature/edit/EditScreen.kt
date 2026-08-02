@@ -1,7 +1,7 @@
 /*
  * file:    EditScreen.kt
  * author:  Mike Redd (typezero)
- * version: 0.8.0-dev.2
+ * version: 0.8.0-dev.5
  * desc:    Premium editor workspace matching the approved Resound visual direction:
  *          file card, waveform stage, timecode/transport strip, tool tiles, status,
  *          and output destination. Audio behavior remains unchanged.
@@ -121,6 +121,7 @@ fun EditScreen(
     waveformExtractor: WaveformExtractor,
     ffmpeg: FFmpegRunner,
     recorder: Recorder,
+    initialUri: Uri? = null,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -196,6 +197,14 @@ fun EditScreen(
                 status = "Load failed: ${t.message}"
             } finally {
                 busy = false
+            }
+        }
+    }
+
+    LaunchedEffect(initialUri) {
+        initialUri?.let { uri ->
+            loadInto(uri) { af ->
+                "Loaded ${af.displayName} · ${fmt(af.durationMs)} · ${af.sampleRate} Hz"
             }
         }
     }

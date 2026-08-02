@@ -1,11 +1,12 @@
 /*
  * file:    MainActivity.kt
  * author:  Mike Redd (typezero)
- * version: 0.8.0-dev.3
+ * version: 0.8.0-dev.5
  * desc:    Premium top-level app shell with persistent bottom navigation.
  */
 package com.typezero.resound
 
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -47,6 +48,7 @@ private fun ResoundRoot(container: AppContainer) {
         mutableStateOf(ResoundDestination.Editor.name)
     }
     val destination = ResoundDestination.valueOf(destinationName)
+    var editorRequestUri by rememberSaveable { mutableStateOf<String?>(null) }
 
     Scaffold(
         bottomBar = {
@@ -62,6 +64,7 @@ private fun ResoundRoot(container: AppContainer) {
                     waveformExtractor = container.waveformExtractor,
                     ffmpeg = container.ffmpeg,
                     recorder = container.recorder,
+                    initialUri = editorRequestUri?.let(Uri::parse),
                 )
 
                 ResoundDestination.Multitrack -> TimelineScreen(
@@ -70,7 +73,12 @@ private fun ResoundRoot(container: AppContainer) {
                     onBack = { destinationName = ResoundDestination.Editor.name },
                 )
 
-                ResoundDestination.Library -> LibraryScreen()
+                ResoundDestination.Library -> LibraryScreen(
+                    onOpenInEditor = { uri ->
+                        editorRequestUri = uri.toString()
+                        destinationName = ResoundDestination.Editor.name
+                    },
+                )
                 ResoundDestination.Settings -> SettingsScreen()
             }
         }

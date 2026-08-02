@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.0-dev.5
+
+- Replaced the Library placeholder with a live Music/Resound export browser.
+- Added export metadata, refresh, sharing, and polished empty/loading/permission states.
+- Added one-tap Library-to-Editor handoff for reopening exported audio.
+- Advanced the development build to versionCode 18.
+
 ## 0.8.0-dev.4
 
 - Added visible trim handles and stronger selected-clip feedback in Multitrack.
