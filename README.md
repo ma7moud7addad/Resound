@@ -33,11 +33,12 @@ arm64-v8a only. Sideload-friendly; no Play Store, no account.
   playhead.
 - **Set as ringtone** — make any loaded file the system default ringtone.
 - **Multitrack** — stack tracks, add clips, drag to position, drag clip edges to
+  Premium studio layout with synchronized ruler, colored track lanes, clip move/trim, mute controls, zoom, and mixdown export.
   trim, zoom and scroll the time axis, mute tracks, and export a mixdown
   (`atrim` + `adelay` + `amix`).
 - **About** — version, links, and attribution from the editor header.
 
-## Status — v0.8.0-dev.2 source
+## Status — v0.8.0-dev.3 source
 
 Feature-complete for the core workflow, now with a secure user-initiated updater: single-file editing, recording,
 playback, ringtones, and multitrack mixing, with the Resound visual identity

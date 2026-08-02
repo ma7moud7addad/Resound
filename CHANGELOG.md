@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.0-dev.3
+
+- Rebuilt Multitrack as a premium studio workspace.
+- Added a shared zoomable time ruler and synchronized track lanes.
+- Added compact track controls, colored track identity, richer clip cards, and a stronger mixdown action.
+- Added polished empty, status, and export states while preserving clip move and trim behavior.
+
 ## 0.8.0-dev.2
 
 - Rebuild the Editor as a premium studio workspace based on the approved mockup.

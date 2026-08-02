@@ -1,7 +1,7 @@
 /*
  * file:    MainActivity.kt
  * author:  Mike Redd (typezero)
- * version: 0.8.0-dev.2
+ * version: 0.8.0-dev.3
  * desc:    Premium top-level app shell with persistent bottom navigation.
  */
 package com.typezero.resound
