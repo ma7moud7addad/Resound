@@ -12,8 +12,8 @@ android {
         applicationId = "com.typezero.resound"
         minSdk = 26
         targetSdk = 35
-        versionCode = 14
-        versionName = "0.8.0-dev.1"
+        versionCode = 15
+        versionName = "0.8.0-dev.2"
 
         buildConfigField(
             "String",

@@ -1,11 +1,10 @@
 /*
  * file:    EditScreen.kt
  * author:  Mike Redd (typezero)
- * version: 0.4.0
- * desc:    Editor screen. Adds (0.4.0) a voice recorder (record -> load into the
- *          editor + save a copy to Music/Resound) and a "Set as Ringtone"
- *          action. Edit ops still run through the shared Effects -> FFmpeg ->
- *          publish path; outputs land in the shared Music/Resound library.
+ * version: 0.8.0-dev.2
+ * desc:    Premium editor workspace matching the approved Resound visual direction:
+ *          file card, waveform stage, timecode/transport strip, tool tiles, status,
+ *          and output destination. Audio behavior remains unchanged.
  */
 package com.typezero.resound.feature.edit
 
@@ -14,26 +13,58 @@ import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddLink
+import androidx.compose.material.icons.filled.AudioFile as AudioFileIcon
+import androidx.compose.material.icons.filled.Compress
+import androidx.compose.material.icons.filled.ContentCut
+import androidx.compose.material.icons.filled.Equalizer
+import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.Forward10
+import androidx.compose.material.icons.filled.GraphicEq
+import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PersonOff
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Replay10
+import androidx.compose.material.icons.filled.ShowChart
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -46,7 +77,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.typezero.resound.core.audio.AudioFile
@@ -57,12 +92,18 @@ import com.typezero.resound.core.audio.WaveformExtractor
 import com.typezero.resound.core.ffmpeg.FFmpegRunner
 import com.typezero.resound.core.io.Outputs
 import com.typezero.resound.core.io.Ringtones
-import com.typezero.resound.feature.about.AboutDialog
 import com.typezero.resound.feature.effects.Effects
 import com.typezero.resound.feature.record.Recorder
+import com.typezero.resound.ui.components.ResoundCard
 import com.typezero.resound.ui.theme.Amber
-import com.typezero.resound.ui.theme.Panel
+import com.typezero.resound.ui.theme.InkRaised
+import com.typezero.resound.ui.theme.Line
+import com.typezero.resound.ui.theme.PanelHi
 import com.typezero.resound.ui.theme.Signal
+import com.typezero.resound.ui.theme.SignalGlow
+import com.typezero.resound.ui.theme.TextHi
+import com.typezero.resound.ui.theme.TextLo
+import com.typezero.resound.ui.theme.TextMid
 import com.typezero.resound.ui.theme.TimecodeStyle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -80,7 +121,6 @@ fun EditScreen(
     waveformExtractor: WaveformExtractor,
     ffmpeg: FFmpegRunner,
     recorder: Recorder,
-    onOpenTimeline: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -106,7 +146,6 @@ fun EditScreen(
     var busy by remember { mutableStateOf(false) }
     var pendingOp by remember { mutableStateOf<EditOp?>(null) }
     var pendingMulti by remember { mutableStateOf<EditOp?>(null) }
-    var showAbout by remember { mutableStateOf(false) }
 
     val player = remember { AudioPlayer() }
     var playing by remember { mutableStateOf(false) }
@@ -398,121 +437,70 @@ fun EditScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .safeDrawingPadding()
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top,
-            ) {
-                Column {
-                    Text("Resound", style = MaterialTheme.typography.headlineSmall)
-                    Text(
-                        current?.displayName ?: "No file loaded",
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-                TextButton(onClick = { showAbout = true }) { Text("About") }
-            }
+            EditorHeader()
 
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Button(
-                    onClick = { picker.launch(arrayOf("audio/*", "video/*")) },
-                    enabled = !busy && !recording,
-                    modifier = Modifier.weight(1f),
-                ) { Text("Open") }
-                if (recording) {
-                    Button(
-                        onClick = { onRecordTap() },
-                        colors = ButtonDefaults.buttonColors(containerColor = Amber, contentColor = Color.Black),
-                        modifier = Modifier.weight(1f),
-                    ) { Text("Stop ${fmt(recordElapsed * 1000)}") }
-                } else {
-                    FilledTonalButton(
-                        onClick = { onRecordTap() },
-                        enabled = !busy,
-                        modifier = Modifier.weight(1f),
-                    ) { Text("Record") }
-                }
-                OutlinedButton(
-                    onClick = { onPlayPause() },
-                    enabled = current != null && !busy && !recording,
-                    modifier = Modifier.weight(1f),
-                ) { Text(if (playing) "Pause" else "Play") }
-            }
+            FileSourceCard(
+                file = current,
+                busy = busy,
+                recording = recording,
+                recordElapsedMs = recordElapsed * 1000,
+                onOpen = { picker.launch(arrayOf("audio/*", "video/*")) },
+                onRecord = { onRecordTap() },
+            )
 
-            val wf = waveform
-            if (wf != null) {
-                Surface(
-                    color = Panel,
-                    shape = RoundedCornerShape(14.dp),
-                    modifier = Modifier.fillMaxWidth().padding(top = 14.dp),
-                ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        WaveformView(
-                            waveform = wf,
-                            selStartMs = selStart,
-                            selEndMs = selEnd,
-                            playheadMs = playhead,
-                            onSelectionChange = { s, e -> selStart = s; selEnd = e },
-                        )
-                        Text(
-                            "${fmt(selStart)} – ${fmt(selEnd)}   ·   ${fmt(selEnd - selStart)}",
-                            style = TimecodeStyle,
-                            color = Signal,
-                            modifier = Modifier.padding(top = 10.dp),
-                        )
-                    }
-                }
-            }
+            WaveformWorkspace(
+                waveform = waveform,
+                selStart = selStart,
+                selEnd = selEnd,
+                playhead = playhead,
+                onSelectionChange = { start, end ->
+                    selStart = start
+                    selEnd = end
+                },
+            )
 
-            Text(status, modifier = Modifier.padding(top = 10.dp), style = MaterialTheme.typography.bodySmall)
+            TransportStrip(
+                enabled = current != null && !busy && !recording,
+                playing = playing,
+                selStart = selStart,
+                selEnd = selEnd,
+                playhead = playhead,
+                onSeekBack = {
+                    playhead = (playhead - 10_000L).coerceAtLeast(selStart)
+                    player.seekTo(playhead)
+                },
+                onPlayPause = { onPlayPause() },
+                onSeekForward = {
+                    playhead = (playhead + 10_000L).coerceAtMost(selEnd)
+                    player.seekTo(playhead)
+                },
+            )
 
-            val hasFile = current != null
+            StatusBanner(status = status, busy = busy)
 
-            Column(
-                modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(top = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                EditOp.ALL.chunked(3).forEach { rowItems ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        rowItems.forEach { op ->
-                            FilledTonalButton(
-                                onClick = { onTap(op) },
-                                enabled = hasFile && !busy && !recording,
-                                modifier = Modifier.weight(1f),
-                            ) { Text(op.label) }
-                        }
-                        repeat(3 - rowItems.size) { Spacer(Modifier.weight(1f)) }
-                    }
-                }
-            }
+            Text(
+                text = "TOOLS",
+                style = MaterialTheme.typography.labelLarge,
+                color = TextLo,
+                modifier = Modifier.padding(start = 2.dp),
+            )
 
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                if (hasFile) {
-                    OutlinedButton(
-                        onClick = { onRingtone() },
-                        enabled = !busy && !recording,
-                        modifier = Modifier.weight(1f),
-                    ) { Text("Ringtone") }
-                }
-                OutlinedButton(
-                    onClick = onOpenTimeline,
-                    enabled = !busy && !recording,
-                    modifier = Modifier.weight(1f),
-                ) { Text("Multitrack ▸") }
-            }
+            ToolGrid(
+                enabled = current != null && !busy && !recording,
+                onTap = { onTap(it) },
+            )
+
+            OutputCard(
+                file = current,
+                enabled = current != null && !busy && !recording,
+                onRingtone = { onRingtone() },
+            )
+
+            Spacer(Modifier.height(4.dp))
         }
     }
 
@@ -527,7 +515,350 @@ fun EditScreen(
         }
     }
 
-    if (showAbout) {
-        AboutDialog(onDismiss = { showAbout = false })
+}
+
+@Composable
+private fun EditorHeader() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Surface(
+            modifier = Modifier.size(42.dp),
+            shape = RoundedCornerShape(12.dp),
+            color = SignalGlow,
+            border = BorderStroke(1.dp, Signal.copy(alpha = 0.35f)),
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.GraphicEq,
+                    contentDescription = null,
+                    tint = Signal,
+                    modifier = Modifier.size(25.dp),
+                )
+            }
+        }
+        Spacer(Modifier.width(12.dp))
+        Column {
+            Text("Resound", style = MaterialTheme.typography.titleLarge)
+            Text("Audio editor", style = MaterialTheme.typography.bodySmall)
+        }
     }
+}
+
+@Composable
+private fun FileSourceCard(
+    file: AudioFile?,
+    busy: Boolean,
+    recording: Boolean,
+    recordElapsedMs: Long,
+    onOpen: () -> Unit,
+    onRecord: () -> Unit,
+) {
+    ResoundCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(
+                    modifier = Modifier.size(44.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    color = PanelHi,
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(Icons.Default.AudioFileIcon, null, tint = Signal)
+                    }
+                }
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = file?.displayName ?: "No file loaded",
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        text = file?.let {
+                            "${it.sampleRate / 1000f} kHz  •  ${if (it.isStereo) "Stereo" else "Mono"}  •  ${fmt(it.durationMs)}"
+                        } ?: "Open audio or record something new",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 14.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Button(
+                    onClick = onOpen,
+                    enabled = !busy && !recording,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Icon(Icons.Default.FolderOpen, null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Open")
+                }
+                FilledTonalButton(
+                    onClick = onRecord,
+                    enabled = !busy,
+                    colors = if (recording) {
+                        ButtonDefaults.filledTonalButtonColors(containerColor = Amber, contentColor = Color.Black)
+                    } else ButtonDefaults.filledTonalButtonColors(),
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Icon(
+                        if (recording) Icons.Default.Stop else Icons.Default.Mic,
+                        null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(if (recording) "Stop ${fmt(recordElapsedMs)}" else "Record")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WaveformWorkspace(
+    waveform: Waveform?,
+    selStart: Long,
+    selEnd: Long,
+    playhead: Long,
+    onSelectionChange: (Long, Long) -> Unit,
+) {
+    ResoundCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text("WAVEFORM", style = MaterialTheme.typography.labelLarge, color = TextLo)
+                Text(
+                    if (waveform != null) "Selection ${fmt(selEnd - selStart)}" else "Waiting for audio",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+                    .background(InkRaised, RoundedCornerShape(12.dp))
+                    .padding(horizontal = 8.dp, vertical = 10.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (waveform != null) {
+                    WaveformView(
+                        waveform = waveform,
+                        selStartMs = selStart,
+                        selEndMs = selEnd,
+                        playheadMs = playhead,
+                        onSelectionChange = onSelectionChange,
+                    )
+                } else {
+                    Column(
+                        modifier = Modifier.height(168.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Icon(Icons.Default.GraphicEq, null, tint = TextLo, modifier = Modifier.size(42.dp))
+                        Text("Your waveform will appear here", color = TextMid, modifier = Modifier.padding(top = 10.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TransportStrip(
+    enabled: Boolean,
+    playing: Boolean,
+    selStart: Long,
+    selEnd: Long,
+    playhead: Long,
+    onSeekBack: () -> Unit,
+    onPlayPause: () -> Unit,
+    onSeekForward: () -> Unit,
+) {
+    ResoundCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(fmt(selStart), style = TimecodeStyle, color = TextLo)
+                Text(
+                    fmtDetailed(playhead),
+                    style = TimecodeStyle.copy(fontSize = MaterialTheme.typography.titleLarge.fontSize),
+                    color = Signal,
+                )
+                Text(fmt(selEnd), style = TimecodeStyle, color = TextLo)
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                IconButton(onClick = onSeekBack, enabled = enabled) {
+                    Icon(Icons.Default.Replay10, "Back 10 seconds")
+                }
+                Spacer(Modifier.width(18.dp))
+                FilledIconButton(
+                    onClick = onPlayPause,
+                    enabled = enabled,
+                    modifier = Modifier.size(56.dp),
+                ) {
+                    Icon(
+                        if (playing) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        if (playing) "Pause" else "Play",
+                        modifier = Modifier.size(30.dp),
+                    )
+                }
+                Spacer(Modifier.width(18.dp))
+                IconButton(onClick = onSeekForward, enabled = enabled) {
+                    Icon(Icons.Default.Forward10, "Forward 10 seconds")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatusBanner(status: String, busy: Boolean) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        color = InkRaised,
+        border = BorderStroke(1.dp, Line),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 11.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (busy) {
+                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                Spacer(Modifier.width(10.dp))
+            }
+            Text(status, style = MaterialTheme.typography.bodySmall, color = TextMid)
+        }
+    }
+}
+
+private data class ToolSpec(val op: EditOp?, val icon: ImageVector, val label: String)
+
+private val toolSpecs = listOf(
+    ToolSpec(EditOp.TRIM, Icons.Default.ContentCut, "Trim"),
+    ToolSpec(EditOp.MIX, Icons.Default.Layers, "Mix"),
+    ToolSpec(EditOp.CONCAT, Icons.Default.AddLink, "Concat"),
+    ToolSpec(EditOp.FADE, Icons.Default.ShowChart, "Fade"),
+    ToolSpec(EditOp.VOLUME, Icons.Default.VolumeUp, "Volume"),
+    ToolSpec(EditOp.SPEED, Icons.Default.Speed, "Speed"),
+    ToolSpec(EditOp.PITCH, Icons.Default.MusicNote, "Pitch"),
+    ToolSpec(EditOp.EQ, Icons.Default.Equalizer, "EQ"),
+    ToolSpec(EditOp.VOCAL, Icons.Default.PersonOff, "Vocal Remove"),
+    ToolSpec(EditOp.CONVERT, Icons.Default.SwapHoriz, "Convert"),
+    ToolSpec(EditOp.COMPRESS, Icons.Default.Compress, "Compress"),
+    ToolSpec(null, Icons.Default.MoreHoriz, "More"),
+)
+
+@Composable
+private fun ToolGrid(enabled: Boolean, onTap: (EditOp) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        toolSpecs.chunked(3).forEach { rowItems ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                rowItems.forEach { item ->
+                    ToolTile(
+                        spec = item,
+                        enabled = enabled && item.op != null,
+                        onClick = { item.op?.let(onTap) },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ToolTile(
+    spec: ToolSpec,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier.aspectRatio(1.18f),
+        shape = RoundedCornerShape(14.dp),
+        color = PanelHi,
+        border = BorderStroke(1.dp, Line),
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Icon(
+                spec.icon,
+                null,
+                tint = if (enabled) Signal else TextLo.copy(alpha = 0.55f),
+                modifier = Modifier.size(24.dp),
+            )
+            Text(
+                spec.label,
+                style = MaterialTheme.typography.labelLarge,
+                color = if (enabled) TextHi else TextLo.copy(alpha = 0.6f),
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                modifier = Modifier.padding(top = 7.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun OutputCard(file: AudioFile?, enabled: Boolean, onRingtone: () -> Unit) {
+    ResoundCard(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Surface(
+                modifier = Modifier.size(42.dp),
+                shape = RoundedCornerShape(12.dp),
+                color = PanelHi,
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.AudioFileIcon, null, tint = Signal)
+                }
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text("OUTPUT", style = MaterialTheme.typography.labelLarge, color = TextLo)
+                Text("Music/Resound", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    file?.let { "${it.sampleRate} Hz  •  ${if (it.isStereo) "Stereo" else "Mono"}" }
+                        ?: "Processed files save here",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            OutlinedButton(onClick = onRingtone, enabled = enabled) {
+                Icon(Icons.Default.Notifications, null, modifier = Modifier.size(17.dp))
+                Spacer(Modifier.width(6.dp))
+                Text("Ringtone")
+            }
+        }
+    }
+}
+
+private fun fmtDetailed(ms: Long): String {
+    val totalSeconds = ms / 1000
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+    val millis = ms % 1000
+    return "%02d:%02d.%03d".format(minutes, seconds, millis)
 }

@@ -1,7 +1,7 @@
 /*
  * file:    MainActivity.kt
  * author:  Mike Redd (typezero)
- * version: 0.8.0-dev.1
+ * version: 0.8.0-dev.2
  * desc:    Premium top-level app shell with persistent bottom navigation.
  */
 package com.typezero.resound
@@ -62,7 +62,6 @@ private fun ResoundRoot(container: AppContainer) {
                     waveformExtractor = container.waveformExtractor,
                     ffmpeg = container.ffmpeg,
                     recorder = container.recorder,
-                    onOpenTimeline = { destinationName = ResoundDestination.Multitrack.name },
                 )
 
                 ResoundDestination.Multitrack -> TimelineScreen(

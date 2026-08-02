@@ -37,7 +37,7 @@ arm64-v8a only. Sideload-friendly; no Play Store, no account.
   (`atrim` + `adelay` + `amix`).
 - **About** — version, links, and attribution from the editor header.
 
-## Status — v0.8.0-dev.1 source
+## Status — v0.8.0-dev.2 source
 
 Feature-complete for the core workflow, now with a secure user-initiated updater: single-file editing, recording,
 playback, ringtones, and multitrack mixing, with the Resound visual identity

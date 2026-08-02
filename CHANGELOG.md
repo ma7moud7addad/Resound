@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.8.0-dev.2
+
+- Rebuild the Editor as a premium studio workspace based on the approved mockup.
+- Add file-source card with metadata, open, and recording controls.
+- Add dedicated waveform stage, selection summary, detailed timecode, and transport controls.
+- Replace the legacy text button wall with consistent icon-based tool tiles.
+- Add refined status and Music/Resound output cards.
+- Remove redundant Editor About and Multitrack controls now handled by bottom navigation.
+- Fix duplicated top system-inset spacing in the Editor.
+
+
 ## 0.8.0-dev.1 — Premium app shell
 
 - Added a persistent premium bottom navigation shell for Editor, Multitrack, Library, and Settings.
