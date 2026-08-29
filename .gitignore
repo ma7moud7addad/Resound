@@ -9,4 +9,6 @@
 .cxx
 local.properties
 
-# Keep release APKs tracked via Git LFS (see .gitattributes), not ignored
+# Build and release binaries are published as GitHub Release assets.
+*.apk
+*.aab

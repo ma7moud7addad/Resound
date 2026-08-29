@@ -1,7 +1,0 @@
-{
-  "versionCode": 12,
-  "versionName": "0.6.2",
-  "apkUrl": "https://github.com/MikereDD/Resound/raw/main/releases/Resound-v0.6.2.apk",
-  "sha256": "e0f450eb5bb0e8cb769ddbf29914639dbd4969090589c686d8b10819d64e78a3",
-  "notes": "Legacy stable release retained while Resound 0.8 is in development."
-}

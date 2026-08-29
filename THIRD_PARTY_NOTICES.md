@@ -11,7 +11,7 @@ Resound uses an FFmpegKit-compatible Android wrapper through:
 
 FFmpeg and the wrapper are distributed under their own applicable open-source
 licenses. The exact obligations depend on the codecs and libraries present in
-the binary used for a particular build. Resound's WTFPL license does not replace
+the binary used for a particular build. Resound's Apache-2.0 license does not replace
 or override those terms.
 
 Before distributing a release APK, verify the license configuration of the
