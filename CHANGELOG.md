@@ -2,6 +2,11 @@
 
 ## 0.8.0-dev.6
 
+- Prepared the standalone Resound repository for its GitHub mirror.
+- Replaced active monorepo links with the standalone `MikereDD/Resound` repository.
+- Added repository license, security/contribution docs, release documentation, issue templates, and Android CI.
+- Added production/example updater manifests and pointed future update checks at the standalone repository.
+
 - Rebuilt Settings as a complete premium application-information workspace.
 - Consolidated updater, About, changelog, export destination, processing, and privacy details.
 - Added a visible development-channel/version badge and consistent action-row treatment.

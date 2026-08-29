@@ -58,7 +58,7 @@ import com.typezero.resound.ui.theme.Signal
 import com.typezero.resound.ui.theme.TextLo
 
 private const val CHANGELOG_URL =
-    "https://github.com/MikereDD/It-Works-On-My-Machine/blob/main/Android/Resound/CHANGELOG.md"
+    "https://github.com/MikereDD/Resound/blob/main/CHANGELOG.md"
 
 @Composable
 fun SettingsScreen(modifier: Modifier = Modifier) {

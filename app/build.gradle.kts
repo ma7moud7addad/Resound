@@ -18,7 +18,7 @@ android {
         buildConfigField(
             "String",
             "UPDATE_MANIFEST_URL",
-            "\"https://raw.githubusercontent.com/MikereDD/It-Works-On-My-Machine/main/Android/Resound/releases/update.json\"",
+            "\"https://raw.githubusercontent.com/MikereDD/Resound/main/releases/update.json\"",
         )
 
         // FFmpeg ships large native libs — restrict ABIs to keep the APK sane.

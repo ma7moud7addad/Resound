@@ -1,104 +1,150 @@
 <p align="center">
-  <img src="https://github.com/MikereDD/It-Works-On-My-Machine/raw/main/Android/Resound/icon.png" width="120" alt="Resound" />
+  <img src="icon.png" width="120" alt="Resound" />
 </p>
 
-# Resound
+<h1 align="center">Resound</h1>
 
-A personal, ad-free audio editor and multitrack mixer for Android. Open or
-record audio, edit it, arrange clips across tracks, and export — all processing
-handled by FFmpeg, with results saved to your shared `Music/Resound` library.
+<p align="center">
+  A local-first audio editor and multitrack mixer for Android.<br />
+  No account. No ads. Processing stays on-device.
+</p>
 
-Built with Kotlin and Jetpack Compose.
+<p align="center">
+  <img alt="Android" src="https://img.shields.io/badge/Android-26%2B-3DDC84?logo=android&logoColor=white" />
+  <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-2.0.21-7F52FF?logo=kotlin&logoColor=white" />
+  <img alt="Jetpack Compose" src="https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4" />
+  <img alt="License" src="https://img.shields.io/badge/license-WTFPL-lightgrey" />
+</p>
 
-## Premium interface roadmap
+Resound opens or records audio, renders a decoded waveform, applies edits through
+FFmpeg, arranges clips across a multitrack timeline, and exports results to the
+shared `Music/Resound` library.
 
-The v0.8 development line is implementing the approved premium Resound mockup in deliberate layers: shared design tokens and navigation shell first, followed by the Editor waveform workspace, Multitrack mixer, a live Music/Resound export library, and Settings refinement. The canonical visual reference is stored at `docs/design/Resound-premium-mockup.png`.
+The app is currently in the **0.8 development line** while the premium interface
+and release infrastructure are being finalized.
+
+## Highlights
+
+- **Waveform Editor** — real `MediaCodec`-decoded waveform, draggable selection,
+  playhead, playback, and detailed timecode.
+- **Audio tools** — Trim, Mix, Concat, Fade, Volume, Speed, Pitch, EQ,
+  Vocal Remove, Convert, and Compress.
+- **Recorder** — record AAC/M4A audio and load it directly into the editor.
+- **Multitrack** — multiple tracks, clip positioning, clip-edge trimming,
+  synchronized zoom/scroll, mute controls, and mixdown export.
+- **Library** — browse exported files in `Music/Resound`, refresh, share, or
+  reopen them directly in the Editor.
+- **Ringtones** — set loaded audio as the system ringtone.
+- **Secure updater** — user-initiated update checks with HTTPS-only endpoints,
+  SHA-256 verification, package-name validation, and signing-certificate matching.
+- **Local-first** — no account, no advertising, and no cloud requirement.
+
+## Premium interface
+
+The v0.8 line rebuilds Resound around a premium dark studio interface using its
+signal-teal waveform identity. The approved design reference is stored at:
+
+`docs/design/Resound-premium-mockup.png`
+
+<p align="center">
+  <img src="docs/design/Resound-premium-mockup.png" width="900" alt="Resound premium interface mockup" />
+</p>
+
+## Current status
+
+**Source version:** `0.8.0-dev.6` (`versionCode 19`)
+
+Core editing, recording, playback, ringtone, multitrack, Library, and secure
+update-check workflows are implemented. The current focus is real-device
+regression testing and preparing the eventual `0.8.0` release.
 
 ## Download
 
-**[Download the latest APK (v0.6.2)](https://github.com/MikereDD/It-Works-On-My-Machine/raw/refs/heads/main/Android/Resound/releases/Resound-v0.6.2.apk)**
+The last legacy APK retained in the repository is `v0.6.2`:
 
-arm64-v8a only. Sideload-friendly; no Play Store, no account.
+**[Download Resound v0.6.2](https://github.com/MikereDD/Resound/raw/main/releases/Resound-v0.6.2.apk)**
 
-## Features
+The next public release will be published through **GitHub Releases** after the
+0.8 release-readiness pass is complete.
 
-- **Editor** — open any audio (or video) file via the system picker, see a real
-  `MediaCodec`-decoded waveform, and drag a two-handle selection.
-- **Eleven operations** — Trim, Mix, Concat, Fade, Volume, Speed, Pitch, EQ,
-  Vocal Remove, Convert, Compress — each wired end to end through FFmpeg with
-  live progress, saving the result to `Music/Resound`.
-- **Recorder** — one-tap voice recording (AAC/m4a) that loads straight into the
-  editor and saves a copy.
-- **Playback** — preview the loaded file or the current selection with a live
-  playhead.
-- **Set as ringtone** — make any loaded file the system default ringtone.
-- **Multitrack** — stack tracks, add clips, drag to position, drag clip edges to
-  Premium studio layout with synchronized ruler, colored track lanes, clip move/trim, mute controls, zoom, and mixdown export.
-  trim, zoom and scroll the time axis, mute tracks, and export a mixdown
-  (`atrim` + `adelay` + `amix`).
-- **Library** — browse files exported to `Music/Resound`, view format/size/date, share them, or reopen them directly in the Editor.
-- **About** — version, links, attribution, and secure update checks from Settings.
-
-## Status — v0.8.0-dev.6 source
-
-Feature-complete for the core workflow, now with a secure user-initiated updater: single-file editing, recording,
-playback, ringtones, and multitrack mixing, with the Resound visual identity
-(dark theme, signal-teal accent, adaptive launcher icon) and an About dialog.
-
-## Roadmap
-
-| Version | Goal |
-|---------|------|
-| 0.1.0   | Scaffold + waveform editor shell |
-| 0.2.0   | File picker (SAF), `FFmpegKitRunner`, **Trim** end to end ✓ |
-| 0.2.1   | Real `MediaCodec` waveform decode ✓ |
-| 0.3.0   | Wire all remaining actions ✓ |
-| 0.4.0   | Voice recorder, set-as-ringtone ✓ |
-| 0.4.1   | In-app playback ✓ |
-| 0.5.0   | Multitrack timeline ✓ |
-| 0.6.0   | Visual identity, launcher icon, clip trim + zoom/scroll ✓ |
-| 0.6.2   | About dialog ✓ |
-| 0.7.0   | Secure in-app updater ✓ |
-| later   | RMS waveform rendering; quality vocal removal (on-device Demucs/Spleeter) |
-
-## FFmpeg dependency
-
-The app talks to FFmpeg through `FFmpegRunner`, implemented by `FFmpegKitRunner`
-over the ffmpeg-kit wrapper API. arthenica's ffmpeg-kit was retired and pulled
-from Maven Central, so this uses a community republish rebuilt for the **16KB
-page size** that Android 15 / API 35 requires:
-
-```
-implementation("com.moizhassan.ffmpeg:ffmpeg-kit-16kb:6.1.1")
-```
-
-It keeps the original `com.arthenica.ffmpegkit` API and pulls `smart-exception`
-transitively. Nothing to vendor — sync and build. Swap the coordinate if you
-prefer another republish (e.g. `io.github.maitrungduc1410:ffmpeg-kit-audio:6.0.1`,
-which is FFmpeg 6.0 and not 16KB-aligned).
+Resound currently targets **arm64-v8a** devices and is designed for sideloading.
 
 ## Build
 
-Standard matrix: AGP 8.7.2, Gradle 8.9, Kotlin 2.0.21, Compose BOM 2024.10.01,
-compileSdk/targetSdk 35, minSdk 26, Java 17. arm64-v8a only (FFmpeg native libs).
+Requirements:
 
-```
-./gradlew :app:assembleRelease
+- JDK 17
+- Android SDK 35
+- Gradle 8.9
+- AGP 8.7.2
+- Kotlin 2.0.21
+
+Build with a locally installed Gradle:
+
+```bash
+gradle :app:assembleDebug
 ```
 
-> Generate the Gradle wrapper once locally with `gradle wrapper --gradle-version 8.9`
-> (wrapper jar/scripts are intentionally not committed).
+or generate a local wrapper if desired:
+
+```bash
+gradle wrapper --gradle-version 8.9
+./gradlew :app:assembleDebug
+```
+
+The Gradle wrapper is intentionally not committed. GitHub Actions installs
+Gradle 8.9 explicitly for CI builds.
+
+## FFmpeg dependency
+
+Resound uses `FFmpegRunner`, implemented by `FFmpegKitRunner`, with the
+16 KB-page-size compatible community republish:
+
+```kotlin
+implementation("com.moizhassan.ffmpeg:ffmpeg-kit-16kb:6.1.1")
+```
+
+The FFmpeg engine has its own licensing requirements. See
+[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
+
+## Updating Resound
+
+The in-app updater reads:
+
+`https://raw.githubusercontent.com/MikereDD/Resound/main/releases/update.json`
+
+A release APK is accepted only when all updater checks succeed, including the
+expected SHA-256, package name, and signing certificate.
+
+See [`releases/update.example.json`](releases/update.example.json) for the
+manifest format and [`docs/RELEASING.md`](docs/RELEASING.md) for the release
+workflow.
+
+## Project history
+
+Resound originally lived inside the `It-Works-On-My-Machine` monorepository.
+Its application-specific Git history was extracted into this standalone
+repository with `git filter-repo`.
+
+See [`docs/MONOREPO-MIGRATION.md`](docs/MONOREPO-MIGRATION.md).
+
+## Contributing and security
+
+This is primarily a personal project, but focused bug reports and pull requests
+are welcome. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+For security-sensitive reports, see [`SECURITY.md`](SECURITY.md).
+
+## License
+
+Resound's original source is released under the **WTFPL**, subject to the
+separate licenses of third-party dependencies. See [`LICENSE`](LICENSE) and
+[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
 ## Changelog
 
-See [CHANGELOG.md](https://github.com/MikereDD/It-Works-On-My-Machine/blob/main/Android/Resound/CHANGELOG.md).
+See [`CHANGELOG.md`](CHANGELOG.md).
 
+---
 
-## Updater release workflow
-
-1. Build and sign the release APK with the same signing key as the installed app.
-2. Copy it into `releases/` and compute its SHA-256.
-3. Update `releases/update.json` with the new `versionCode`, `versionName`, raw HTTPS APK URL, hash, and notes.
-4. Commit the APK and manifest together. The app rejects mismatched hashes, package names, or signing certificates.
-
-`releases/update.example.json` is a template for the next release.
+<p align="center">Built by Typezer∅</p>

@@ -25,3 +25,10 @@
 ## Release caution
 
 The updater intentionally requires the downloaded APK to use the same signing certificate as the installed app. A debug-signed build cannot update a release-signed build, and changing the release key will be rejected by design.
+
+## Standalone GitHub readiness pass
+
+- Active repository/changelog links now target `MikereDD/Resound` instead of the old monorepo path.
+- The updater manifest endpoint now targets the standalone repository.
+- Added production/example update manifests, release documentation, project license, third-party notices, security policy, contribution guide, GitHub issue templates, and a debug-build CI workflow.
+- Preserved the approved premium UI mockup under `docs/design/` as the public visual reference.
